@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(DEBUG_TAG, "Starting action call().");
                 editText_phoneNumber = (EditText) findViewById(R.id.editText_phoneNumber);
                 String phoneNumber = editText_phoneNumber.getText().toString();
-                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse(phoneNumber));
+                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + phoneNumber));
                 startActivity(intent);
                 Log.d(DEBUG_TAG, "Complete action call().");
             } else {
@@ -62,30 +62,47 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.M)
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if(checkSelfPermission(Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(MainActivity.this, "Access CALL_PHONE granted.", Toast.LENGTH_SHORT).show();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if(checkSelfPermission(Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(MainActivity.this, "Access CALL_PHONE granted.", Toast.LENGTH_SHORT).show();
+            }
         } else {
-            Toast.makeText(MainActivity.this, "Access CALL_PHONE denied!", Toast.LENGTH_SHORT).show();
+            if(ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(MainActivity.this, "Access CALL_PHONE granted.", Toast.LENGTH_SHORT).show();
+            }
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     private boolean checkPermission() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
-            return true;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            } else {
+                return false;
+            }
         } else {
-            return false;
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.M)
     private void setPermission() {
-        if(shouldShowRequestPermissionRationale(Manifest.permission.CALL_PHONE)){
-            Toast.makeText(this, "CALL_PHONE permission is needed.", Toast.LENGTH_SHORT).show();
-            requestPermissions(new String[]{Manifest.permission.CALL_PHONE}, PackageManager.PERMISSION_GRANTED);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if(shouldShowRequestPermissionRationale(Manifest.permission.CALL_PHONE)){
+                Toast.makeText(this, "CALL_PHONE permission is needed.", Toast.LENGTH_SHORT).show();
+                requestPermissions(new String[]{Manifest.permission.CALL_PHONE}, PackageManager.PERMISSION_GRANTED);
+            }
+        } else {
+            if(ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CALL_PHONE)) {
+                Toast.makeText(this, "CALL_PHONE permission is needed.", Toast.LENGTH_SHORT).show();
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CALL_PHONE}, PackageManager.PERMISSION_GRANTED);
+            }
         }
     }
 }
